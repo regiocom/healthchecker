@@ -47,7 +47,6 @@ func (h *Checker) ServeHTTP(addr string) error {
 		return fmt.Errorf("server is alrady running at %v", h.server.Addr)
 	}
 
-	// addr := fmt.Sprintf(":%v", port)
 	h.server = &http.Server{Addr: addr, Handler: h.serverMux()}
 	if err := h.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("could not listen on %s: %v", addr, err)
@@ -74,7 +73,7 @@ func (h *Checker) ServeHTTPBackground(addr string) func() {
 	return func() {
 		err := h.Shutdown()
 		if err != nil {
-			log.Fatalf("failed to start health server: %v", err)
+			log.Fatalf("failed to shutdown health server: %v", err)
 		}
 	}
 }
@@ -93,8 +92,6 @@ func (h *Checker) serverMux() *http.ServeMux {
 	m.HandleFunc("/alive", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"alive":true}`))
-
-		w.WriteHeader(http.StatusOK)
 	})
 
 	m.HandleFunc("/healthy", func(w http.ResponseWriter, _ *http.Request) {
@@ -115,7 +112,6 @@ func (h *Checker) serverMux() *http.ServeMux {
 			_, _ = w.Write(b)
 		} else {
 			log.Printf("failed to write health-check response: %v\n", err)
-			resp.Healthy = false
 		}
 	})
 
@@ -126,7 +122,7 @@ func (h *Checker) serverMux() *http.ServeMux {
 func runProbes(probes map[string]Probe) (bool, []string) {
 	wg := sync.WaitGroup{}
 	m := sync.Mutex{}
-	var errors []error
+	var reasons []string
 
 	for service, probe := range probes {
 		wg.Add(1)
@@ -136,7 +132,7 @@ func runProbes(probes map[string]Probe) (bool, []string) {
 		go func() {
 			if err := probe(); err != nil {
 				m.Lock()
-				errors = append(errors, fmt.Errorf("%v: %v", service, err))
+				reasons = append(reasons, fmt.Sprintf("%v: %v", service, err))
 				m.Unlock()
 			}
 
@@ -145,12 +141,6 @@ func runProbes(probes map[string]Probe) (bool, []string) {
 	}
 
 	wg.Wait()
-
-	var reasons []string
-
-	for _, err := range errors {
-		reasons = append(reasons, err.Error())
-	}
 
 	return len(reasons) == 0, reasons
 }
