@@ -1,6 +1,7 @@
 package health
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/gomodule/redigo/redis"
@@ -58,5 +59,12 @@ func RedisPoolProbe(pool *redis.Pool) Probe {
 		}
 
 		return nil
+	}
+}
+
+// Checks a SQL connection for readiness
+func SQLProbe(db *sql.DB) Probe {
+	return func() error {
+		return db.Ping()
 	}
 }
