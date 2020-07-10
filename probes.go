@@ -22,7 +22,7 @@ type VaultHealthReporter interface {
 //
 // Example:
 //		cc, _ := grpc.Dial(...)
-//		checker.AddHealthyProbe("my-grpc-service", health.GrpcProbe(cc))
+//		checker.AddReadinessProbe("my-grpc-service", health.GrpcProbe(cc))
 func GrpcProbe(conn GrpcStateReporter) Probe {
 	return func() error {
 		state := conn.GetState()
@@ -42,7 +42,7 @@ type NatsStateReporter interface {
 //
 // Example:
 //		sc, _ := stan.Connect(...)
-//		checker.AddHealthyProbe("my-stan-service", health.NatsProbe(sc.NatsConn()))
+//		checker.AddReadinessProbe("my-stan-service", health.NatsProbe(sc.NatsConn()))
 func NatsProbe(conn NatsStateReporter) Probe {
 	return func() error {
 		state := conn.Status()

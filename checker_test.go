@@ -38,7 +38,7 @@ func TestChecker_alive(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/alive", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/healthy", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
@@ -50,7 +50,7 @@ func TestChecker_AddHealthyProbe(t *testing.T) {
 	called := false
 
 	checker := &Checker{}
-	checker.AddHealthyProbe("my-service", func() error {
+	checker.AddReadinessProbe("my-service", func() error {
 		called = true
 		return nil
 	})
@@ -58,7 +58,7 @@ func TestChecker_AddHealthyProbe(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/healthy", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/ready", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
@@ -70,14 +70,14 @@ func TestChecker_AddHealthyProbe(t *testing.T) {
 
 func TestChecker_AddHealthyProbe_unhealthy(t *testing.T) {
 	checker := &Checker{}
-	checker.AddHealthyProbe("my-service", func() error {
+	checker.AddReadinessProbe("my-service", func() error {
 		return fmt.Errorf("unhealthy")
 	})
 
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/healthy", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/ready", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusServiceUnavailable, resp.StatusCode)

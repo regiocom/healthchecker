@@ -12,33 +12,33 @@ import (
 
 type Probe func() error
 
-type healthyResponse struct {
-	Healthy bool     `json:"healthy"`
+type readyResponse struct {
+	Ready   bool     `json:"healthy"`
 	Reasons []string `json:"reasons,omitempty"`
 }
 
 // A Checker can be used to provide a liveliness and readiness endpoint for your application.
-// Use `checker.AddHealthyProbe` to add a test for readiness.
+// Use `checker.AddReadinessProbe` to add a test for readiness.
 type Checker struct {
-	healthyProbes map[string]Probe
-	server        *http.Server
+	readinessProbes map[string]Probe
+	server          *http.Server
 }
 
 // Add a probe which should be run each time the service is checked for readiness.
 // Example:
 //		conn, _ := grpc.Dial(...)
-//		checker.AddHealthyProbe("eventstore", health.GrpcProbe(conn))
-func (h *Checker) AddHealthyProbe(service string, probe Probe) {
-	_, alreadyRegistered := h.healthyProbes[service]
+//		checker.AddReadinessProbe("eventstore", health.GrpcProbe(conn))
+func (h *Checker) AddReadinessProbe(service string, probe Probe) {
+	_, alreadyRegistered := h.readinessProbes[service]
 	if alreadyRegistered {
 		panic("a health probe should have a unique identifier")
 	}
 
-	if h.healthyProbes == nil {
-		h.healthyProbes = map[string]Probe{}
+	if h.readinessProbes == nil {
+		h.readinessProbes = map[string]Probe{}
 	}
 
-	h.healthyProbes[service] = probe
+	h.readinessProbes[service] = probe
 }
 
 // Serves health status endpoints via http
@@ -89,22 +89,22 @@ func (h *Checker) Shutdown() error {
 func (h *Checker) serverMux() *http.ServeMux {
 	m := http.NewServeMux()
 
-	m.HandleFunc("/alive", func(w http.ResponseWriter, _ *http.Request) {
+	m.HandleFunc("/healthy", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"alive":true}`))
+		_, _ = w.Write([]byte(`{"healthy":true}`))
 	})
 
-	m.HandleFunc("/healthy", func(w http.ResponseWriter, _ *http.Request) {
-		ok, reasons := runProbes(h.healthyProbes)
+	m.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
+		ok, reasons := runProbes(h.readinessProbes)
 
-		resp := &healthyResponse{
-			Healthy: ok,
+		resp := &readyResponse{
+			Ready:   ok,
 			Reasons: reasons,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if !resp.Healthy {
+		if !resp.Ready {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
 
