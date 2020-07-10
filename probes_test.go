@@ -1,8 +1,10 @@
 package health
 
 import (
+	"fmt"
 	"testing"
 
+	vault "github.com/hashicorp/vault/api"
 	"github.com/nats-io/go-nats"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc/connectivity"
@@ -14,6 +16,15 @@ type MockGrpcReporter struct {
 
 func (m MockGrpcReporter) GetState() connectivity.State {
 	return m.state
+}
+
+type MockVaultHealthReporter struct {
+	health *vault.HealthResponse
+	err    error
+}
+
+func (m MockVaultHealthReporter) Health() (*vault.HealthResponse, error) {
+	return m.health, m.err
 }
 
 func TestGrpcProbe(t *testing.T) {
@@ -60,6 +71,73 @@ func TestNatsProbe_err(t *testing.T) {
 	}
 
 	probe := NatsProbe(reporter)
+
+	assert.Error(t, probe())
+}
+
+func TestVaultProbe(t *testing.T) {
+	reporter := &MockVaultHealthReporter{
+		health: &vault.HealthResponse{
+			Initialized: true,
+			Sealed:      false,
+			Standby:     false,
+		},
+	}
+
+	probe := VaultProbe(reporter)
+
+	assert.NoError(t, probe())
+}
+
+func TestVaultProbe_failsForSealedVault(t *testing.T) {
+	reporter := &MockVaultHealthReporter{
+		health: &vault.HealthResponse{
+			Initialized: true,
+			Sealed:      true,
+			Standby:     false,
+		},
+	}
+
+	probe := VaultProbe(reporter)
+
+	assert.Error(t, probe())
+}
+
+func TestVaultProbe_failsForNotInitializedVault(t *testing.T) {
+	reporter := &MockVaultHealthReporter{
+		health: &vault.HealthResponse{
+			Initialized: false,
+			Sealed:      false,
+			Standby:     false,
+		},
+	}
+
+	probe := VaultProbe(reporter)
+
+	assert.Error(t, probe())
+}
+
+func TestVaultProbe_failsForVaultInStandby(t *testing.T) {
+	reporter := &MockVaultHealthReporter{
+		health: &vault.HealthResponse{
+			Initialized: true,
+			Sealed:      false,
+			Standby:     true,
+		},
+	}
+
+	probe := VaultProbe(reporter)
+
+	assert.Error(t, probe())
+}
+
+func TestVaultProbe_failsForErrorDuringHealthCheck(t *testing.T) {
+	reporter := &MockVaultHealthReporter{
+		health: nil,
+		err:    fmt.Errorf("could not get health"),
+	}
+
+	probe := VaultProbe(reporter)
 
 	assert.Error(t, probe())
 }

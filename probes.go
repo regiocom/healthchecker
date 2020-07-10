@@ -5,12 +5,17 @@ import (
 	"fmt"
 
 	"github.com/gomodule/redigo/redis"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/nats-io/go-nats"
 	"google.golang.org/grpc/connectivity"
 )
 
 type GrpcStateReporter interface {
 	GetState() connectivity.State
+}
+
+type VaultHealthReporter interface {
+	Health() (*vault.HealthResponse, error)
 }
 
 // Checks a grpc connection for readiness.
@@ -66,5 +71,29 @@ func RedisPoolProbe(pool *redis.Pool) Probe {
 func SQLProbe(db *sql.DB) Probe {
 	return func() error {
 		return db.Ping()
+	}
+}
+
+// Checks a vault connection for readiness
+func VaultProbe(hr VaultHealthReporter) Probe {
+	return func() error {
+		hc, err := hr.Health()
+		if err != nil {
+			return fmt.Errorf("could not get vault health: %v", err.Error())
+		}
+
+		if !hc.Initialized {
+			return fmt.Errorf("vault is not initialized")
+		}
+
+		if hc.Sealed {
+			return fmt.Errorf("vault is sealed")
+		}
+
+		if hc.Standby {
+			return fmt.Errorf("vault is on standby")
+		}
+
+		return nil
 	}
 }
