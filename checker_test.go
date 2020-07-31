@@ -38,7 +38,7 @@ func TestChecker_alive(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/healthy", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/alive", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
