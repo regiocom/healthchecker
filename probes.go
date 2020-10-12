@@ -35,9 +35,10 @@ func GrpcProbe(conn GrpcStateReporter) Probe {
 // Pings a http endpoint for readiness. Called endpoint should return 2xx as status.
 //
 // Example:
-//		checker.AddReadinessProbe("my-http-service", health.HttpProbe("http://my-service:8080/ready"))
-func HttpProbe(endpoint string) Probe {
+//		checker.AddReadinessProbe("my-http-service", health.HTTPProbe("http://my-service:8080/ready"))
+func HTTPProbe(endpoint string) Probe {
 	return func() error {
+		// #nosec G107
 		resp, err := http.Get(endpoint)
 		if err != nil {
 			return fmt.Errorf("endpoint could not be reached: %v", err)
