@@ -15,7 +15,7 @@ func TestChecker_alive(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/alive", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/.well-known/alive", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
@@ -35,7 +35,7 @@ func TestChecker_AddHealthyProbe(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/ready", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/.well-known/ready", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
@@ -54,7 +54,7 @@ func TestChecker_AddHealthyProbe_unhealthy(t *testing.T) {
 	server := httptest.NewServer(checker.serverMux())
 	defer server.Close()
 
-	resp, err := http.Get(fmt.Sprintf("%v/ready", server.URL))
+	resp, err := http.Get(fmt.Sprintf("%v/.well-known/ready", server.URL))
 
 	assert.NoError(t, err)
 	assert.EqualValues(t, http.StatusServiceUnavailable, resp.StatusCode)

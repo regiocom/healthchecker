@@ -89,12 +89,12 @@ func (h *Checker) Shutdown() error {
 func (h *Checker) serverMux() *http.ServeMux {
 	m := http.NewServeMux()
 
-	m.HandleFunc("/alive", func(w http.ResponseWriter, _ *http.Request) {
+	m.HandleFunc("/.well-known/alive", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"alive":true}`))
 	})
 
-	m.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
+	m.HandleFunc("/.well-known/ready", func(w http.ResponseWriter, _ *http.Request) {
 		ok, reasons := runProbes(h.readinessProbes)
 
 		resp := &readyResponse{

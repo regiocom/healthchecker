@@ -51,7 +51,7 @@ The following table contains a set of common states / events and the expected he
 
 ## Implementation
 
-A service must implement an health endpoint to check if it is alive and ready. Both have to be served via `HTTP/1.1` under the same port (default: 8080) on **all** interfaces. The routes should be `/alive` and `/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
+A service must implement a health endpoint to check if it is alive and ready. Both have to be served via `HTTP/1.1` under the same port (default: 8080) on **all** interfaces. The routes should be `/.well-known/alive` and `/.well-known/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
 
 Both endpoints should be served independently and next to the main application on a different port.
 
@@ -59,7 +59,7 @@ Both endpoints should be served independently and next to the main application o
 
 The response for the liveliness probe should be a simple true or false.
 
-**`/alive`: success**
+**`/.well-known/alive`: success**
 
 ```http
 HTTP/1.1 200 OK
@@ -70,7 +70,7 @@ Content-Type: application/json
 }
 ```
 
-**`/alive`: failure**
+**`/.well-known/alive`: failure**
 
 ```http
 HTTP/1.1 503 Service Unavailable
@@ -85,7 +85,7 @@ Content-Type: application/json
 
 The response for the readiness probe should be a simple true or false. For debug purpose the failure response can contain a list of simple reasons, why a service is unhealthy. Detailed information should be reported via the metrics / telemetry endpoints.
 
-**`/ready`: success**
+**`/.well-known/ready`: success**
 
 ```http
 HTTP/1.1 200 OK
@@ -96,7 +96,7 @@ Content-Type: application/json
 }
 ```
 
-**`/ready`: failure**
+**`/.well-known/ready`: failure**
 
 ```http
 HTTP/1.1 503 Service Unavailable
