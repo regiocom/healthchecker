@@ -14,7 +14,7 @@ import (
 func TestChecker_ServeHttp(t *testing.T) {
 	checker := &Checker{}
 	go func() {
-		err := checker.ServeHTTP("")
+		err := checker.ServeHTTP("127.0.0.1:0")
 		assert.NoError(t, err)
 	}()
 
@@ -26,7 +26,7 @@ func TestChecker_ServeHttp(t *testing.T) {
 
 func TestChecker_ServeHttpBackground(t *testing.T) {
 	checker := &Checker{}
-	shutdown := checker.ServeHTTPBackground("")
+	shutdown := checker.ServeHTTPBackground("127.0.0.1:0")
 
 	time.Sleep(10 * time.Millisecond)
 
