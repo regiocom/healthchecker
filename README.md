@@ -23,7 +23,7 @@ A service is defined as alive, if it started correctly and accepts incoming requ
 
 **Ready**
 
-A service is defined as ready, if all mandatory dependent services, for example a databases, can be reached and the service can work as expected. A service which is not ready for more than three times in a row will skipped by the internal load balancer.
+A service is defined as ready, if all mandatory dependent services, for example a databases, can be reached and the service can work as expected. A service which is not ready for more than three times in a row will be skipped by the internal load balancer.
 
 A service which is alive, but not ready has to recover itself.
 
@@ -47,7 +47,7 @@ The following table contains a set of common states / events and the expected he
 
 ## Implementation
 
-A service must implement an health endpoint to check if it is alive and ready. Both has to be served via `HTTP/1.1` under the same port (default: 8080) on **all** interfaces. The routes should be `/alive` and `/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
+A service must implement an health endpoint to check if it is alive and ready. Both have to be served via `HTTP/1.1` under the same port (default: 8080) on **all** interfaces. The routes should be `/alive` and `/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
 
 Both endpoints should be served independently and next to the main application on a different port.
 
