@@ -1,6 +1,7 @@
 package health
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	vault "github.com/hashicorp/vault/api"
 	"github.com/nats-io/go-nats"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"google.golang.org/grpc/connectivity"
 )
 
@@ -50,6 +52,22 @@ func HTTPProbe(endpoint string) Probe {
 		}
 
 		return fmt.Errorf("service is not ready: %v - %v", resp.StatusCode, resp.Status)
+	}
+}
+
+// Interface matching a mongodb client's ping method.
+type MongoStateReporter interface {
+	Ping(ctx context.Context, rp *readpref.ReadPref) error
+}
+
+// Checks a mongodb connection for readiness.
+//
+// Example:
+//		client, _ := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+//		checker.AddReadinessProbe("my-mongo-client", health.MongoProbe(client))
+func MongoProbe(client MongoStateReporter) Probe {
+	return func() error {
+		return client.Ping(context.Background(), readpref.Primary())
 	}
 }
 
