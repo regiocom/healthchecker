@@ -5,6 +5,8 @@ A dead simple health checker for GO services.
 [![Go Report Card](https://goreportcard.com/badge/github.com/regiocom/healthchecker)](https://goreportcard.com/report/github.com/regiocom/healthchecker)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/regiocom/healthchecker)](https://pkg.go.dev/github.com/regiocom/healthchecker) 
 
+![HealthChecker Logo](logo.png)
+
 ## TL;DR
 
 Checks the availability of all services your service depends on and provides `/.well-known/alive` and `/.well-known/ready` endpoints. Supports some probes out of the box and can be extended by your own readiness probe. See [all available probes](https://pkg.go.dev/github.com/regiocom/healthchecker#Probe) or create a [custom probe](#custom-probes). 
