@@ -3,6 +3,7 @@ package health
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 
 	"github.com/gomodule/redigo/redis"
 	vault "github.com/hashicorp/vault/api"
@@ -28,6 +29,25 @@ func GrpcProbe(conn GrpcStateReporter) Probe {
 		}
 
 		return nil
+	}
+}
+
+// Pings a http endpoint for readiness. Called endpoint should return 2xx as status.
+//
+// Example:
+//		checker.AddReadinessProbe("my-http-service", health.HttpProbe("http://my-service:8080/ready"))
+func HttpProbe(endpoint string) Probe {
+	return func() error {
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			return fmt.Errorf("endpoint could not be reached: %v", err)
+		}
+
+		if resp.StatusCode >= 200 && resp.StatusCode <= 299 {
+			return nil
+		}
+
+		return fmt.Errorf("service is not ready: %v - %v", resp.StatusCode, resp.Status)
 	}
 }
 

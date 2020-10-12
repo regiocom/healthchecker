@@ -2,6 +2,8 @@ package health
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	vault "github.com/hashicorp/vault/api"
@@ -44,6 +46,31 @@ func TestGrpcProbe_err(t *testing.T) {
 
 	probe := GrpcProbe(reporter)
 
+	assert.Error(t, probe())
+}
+
+func TestHttpProbe(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+	defer s.Close()
+
+	probe := HttpProbe(s.URL)
+	assert.NoError(t, probe())
+}
+
+func TestHttpProbe_err(t *testing.T) {
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(503)
+	}))
+	defer s.Close()
+
+	probe := HttpProbe(s.URL)
+	assert.Error(t, probe())
+}
+
+func TestHttpProbe_err_invalidUrl(t *testing.T) {
+	probe := HttpProbe("http://not-valid-endpoint.localhost/not-healthy")
 	assert.Error(t, probe())
 }
 
