@@ -1,6 +1,10 @@
 # healthchecker
 A dead simple health checker for GO applications
 
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/regiocom/healthchecker)
+[![Go Report Card](https://goreportcard.com/badge/github.com/regiocom/healthchecker)](https://goreportcard.com/report/github.com/regiocom/healthchecker)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/regiocom/healthchecker)](https://pkg.go.dev/github.com/regiocom/healthchecker) 
+
 ## Usage
 ```go
 func main() {
