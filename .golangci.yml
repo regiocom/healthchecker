@@ -1,7 +1,4 @@
 run:
-  issues-exit-code: 0
-  skip-dirs:
-    - protos
   skip-dirs-use-default: true
   timeout: 5m
 
