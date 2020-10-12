@@ -13,7 +13,7 @@ import (
 type Probe func() error
 
 type readyResponse struct {
-	Ready   bool     `json:"healthy"`
+	Ready   bool     `json:"ready"`
 	Reasons []string `json:"reasons,omitempty"`
 }
 
