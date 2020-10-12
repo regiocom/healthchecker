@@ -11,28 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestChecker_ServeHttp(t *testing.T) {
-	checker := &Checker{}
-	go func() {
-		err := checker.ServeHTTP("127.0.0.1:0")
-		assert.NoError(t, err)
-	}()
-
-	time.Sleep(10 * time.Millisecond)
-
-	err := checker.Shutdown()
-	assert.NoError(t, err)
-}
-
-func TestChecker_ServeHttpBackground(t *testing.T) {
-	checker := &Checker{}
-	shutdown := checker.ServeHTTPBackground("127.0.0.1:0")
-
-	time.Sleep(10 * time.Millisecond)
-
-	shutdown()
-}
-
 func TestChecker_alive(t *testing.T) {
 	checker := &Checker{}
 	server := httptest.NewServer(checker.serverMux())
