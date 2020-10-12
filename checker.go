@@ -86,9 +86,8 @@ func (h *Checker) Shutdown() error {
 	return h.server.Shutdown(ctx)
 }
 
-func (h *Checker) serverMux() *http.ServeMux {
-	m := http.NewServeMux()
-
+// Appends `/.well-known/alive` and `/.well-known/ready` endpoints to given server mux
+func (h *Checker) AppendHealthEndpoints(m *http.ServeMux) {
 	m.HandleFunc("/.well-known/alive", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"alive":true}`))
@@ -114,6 +113,12 @@ func (h *Checker) serverMux() *http.ServeMux {
 			log.Printf("failed to write health-check response: %v\n", err)
 		}
 	})
+}
+
+func (h *Checker) serverMux() *http.ServeMux {
+	m := http.NewServeMux()
+
+	h.AppendHealthEndpoints(m)
 
 	return m
 }

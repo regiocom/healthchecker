@@ -6,10 +6,28 @@ A dead simple health checker for GO applications
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/regiocom/healthchecker)](https://pkg.go.dev/github.com/regiocom/healthchecker) 
 
 ## Usage
+
+**Serve on same port with your application**
 ```go
 func main() {
-    health := &Checker{}
-    defer health.ServeHTTPBackground(":8080")()
+	checker := health.Checker{}
+
+	// This can be any http.ServerMux
+    checker.AppendHealthEndpoints(http.DefaultServeMux)
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("Hello World!"))
+	})
+
+	_ = http.ListenAndServe(":8080", http.DefaultServeMux)
+}
+```
+
+**Serve on separate port** 
+```go
+func main() {
+    checker := &health.Checker{}
+    defer checker.ServeHTTPBackground(":8080")()
 
     // Check an external gRPC Service
     cc, _ := grpc.Dial(...)
