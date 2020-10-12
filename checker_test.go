@@ -6,32 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestChecker_ServeHttp(t *testing.T) {
-	checker := &Checker{}
-	go func() {
-		err := checker.ServeHTTP("")
-		assert.NoError(t, err)
-	}()
-
-	time.Sleep(10 * time.Millisecond)
-
-	err := checker.Shutdown()
-	assert.NoError(t, err)
-}
-
-func TestChecker_ServeHttpBackground(t *testing.T) {
-	checker := &Checker{}
-	shutdown := checker.ServeHTTPBackground("")
-
-	time.Sleep(10 * time.Millisecond)
-
-	shutdown()
-}
 
 func TestChecker_alive(t *testing.T) {
 	checker := &Checker{}
