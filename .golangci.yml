@@ -1,0 +1,27 @@
+run:
+  issues-exit-code: 0
+  skip-dirs:
+    - protos
+  skip-dirs-use-default: true
+  timeout: 5m
+
+linters:
+  enable:
+    - gofmt
+    - golint
+    - gosec
+    - misspell
+
+service:
+  golangci-lint-version: 1.24.x # use the fixed version to not introduce new linters unexpectedly
+
+issues:
+  exclude-rules:
+    - path: test
+      linters: golint
+      text: 'should not use dot imports'
+
+      # excluded due to https://github.com/golangci/golangci-lint/issues/791
+    - path: test
+      linters: unused
+      text: 'func `.*` is unused'
