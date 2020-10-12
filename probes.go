@@ -33,9 +33,10 @@ func GrpcProbe(conn GrpcStateReporter) Probe {
 }
 
 // Pings a http endpoint for readiness. Called endpoint should return 2xx as status.
+// **INFO:** If you check another service using this lib, always use the `/.well-known/alive endpoint` to prevent cascading requests.
 //
 // Example:
-//		checker.AddReadinessProbe("my-http-service", health.HTTPProbe("http://my-service:8080/ready"))
+//		checker.AddReadinessProbe("my-http-service", health.HTTPProbe("http://my-service:8080/.well-known/alive"))
 func HTTPProbe(endpoint string) Probe {
 	return func() error {
 		// #nosec G107
