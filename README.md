@@ -1,9 +1,15 @@
 # healthchecker
-A dead simple health checker for GO applications
+A dead simple health checker for GO services. 
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/regiocom/healthchecker)
 [![Go Report Card](https://goreportcard.com/badge/github.com/regiocom/healthchecker)](https://goreportcard.com/report/github.com/regiocom/healthchecker)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/regiocom/healthchecker)](https://pkg.go.dev/github.com/regiocom/healthchecker) 
+
+## TL;DR
+
+Checks the availability of all services your service depends on and provides `/.well-known/alive` and `/.well-known/ready` endpoints. Supports some probes out of the box and can be extended by your own readiness probe. See [all available probes](https://pkg.go.dev/github.com/regiocom/healthchecker#Probe) or create a [custom probe](#custom-probes). 
+
+Learn more [about health checks](#about-heath-checks).
 
 ## Usage
 
@@ -33,6 +39,35 @@ func main() {
     cc, _ := grpc.Dial(...)
     checker.AddReadinessProbe("my-grpc-service", health.GrpcProbe(cc))
 }
+```
+
+## Custom Probes
+
+A `health.Probe` is just a plain function returning an `error` if the service can not be reached. The probe is called any time the readiness endpoint is called. Thus use the most simple way to check if the service you depend on is up and running.
+
+```go
+// Checks if the customServiceConn can be reached.
+func MyCustomServiceProbe(srv *customService) health.Probe {
+    return func() error {
+        // Check your service for availability
+        available, err := srv.Ping()
+        if !available || err != nil {
+	    // Service is not available. We return an error.
+            return fmt.Errorf("service is unavailable: %v", err)
+	}
+	
+	// My depending service is up and running!
+	return nil
+    }
+}
+```
+
+**Usage**
+```go
+checker := &health.Checker{}
+
+src := NewCustomService()
+checker.AddReadinessProbe("my-service", MyCustomServiceProbe(srv))
 ```
 
 ## About Heath Checks
@@ -69,7 +104,7 @@ The following table contains a set of common states / events and the expected he
 
 ## Implementation
 
-A service must implement a health endpoint to check if it is alive and ready. Both have to be served via `HTTP/1.1` under the same port (default: 8080) on **all** interfaces. The routes should be `/.well-known/alive` and `/.well-known/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
+A service must implement a health endpoint to check if it is alive and ready. Both have to be served via `HTTP/1.1` under the same port on **all** interfaces. The routes should be `/.well-known/alive` and `/.well-known/ready`. Those endpoints must not require any authentication or any additional header. Response should either be `200 OK` or `503 Service Unavailable` and a minimal JSON body.
 
 Both endpoints should be served independently and next to the main application on a different port.
 
