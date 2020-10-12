@@ -10,12 +10,9 @@ import (
 	"google.golang.org/grpc/connectivity"
 )
 
+// Interface matching a gRPC client's state method.
 type GrpcStateReporter interface {
 	GetState() connectivity.State
-}
-
-type VaultHealthReporter interface {
-	Health() (*vault.HealthResponse, error)
 }
 
 // Checks a grpc connection for readiness.
@@ -34,6 +31,7 @@ func GrpcProbe(conn GrpcStateReporter) Probe {
 	}
 }
 
+// Interface matching a nats client's status method.
 type NatsStateReporter interface {
 	Status() nats.Status
 }
@@ -67,11 +65,16 @@ func RedisPoolProbe(pool *redis.Pool) Probe {
 	}
 }
 
-// Checks a SQL connection for readiness
+// Checks a SQL connection for readiness.
 func SQLProbe(db *sql.DB) Probe {
 	return func() error {
 		return db.Ping()
 	}
+}
+
+// Interface matching a vault client's health method.
+type VaultHealthReporter interface {
+	Health() (*vault.HealthResponse, error)
 }
 
 // Checks a vault connection for readiness

@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// A Probe is a health check for a service you depend on.
+// Should return an error if the tested service is unhealthy.
 type Probe func() error
 
 type readyResponse struct {
@@ -60,7 +62,7 @@ func (h *Checker) ServeHTTP(addr string) error {
 // Example:
 //	func main() {
 //		health := &Checker{}
-//		defer health.ServeHTTPBackground(8080)()
+//		defer health.ServeHTTPBackground(":8080")()
 // 	}
 func (h *Checker) ServeHTTPBackground(addr string) func() {
 	go func() {
