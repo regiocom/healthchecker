@@ -1,6 +1,8 @@
 package health
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +11,7 @@ import (
 	vault "github.com/hashicorp/vault/api"
 	"github.com/nats-io/go-nats"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"google.golang.org/grpc/connectivity"
 )
 
@@ -71,6 +74,34 @@ func TestHTTPProbe_err(t *testing.T) {
 
 func TestHTTPProbe_err_invalidUrl(t *testing.T) {
 	probe := HTTPProbe("http://not-valid-endpoint.localhost/not-healthy")
+	assert.Error(t, probe())
+}
+
+type MockMongoReporter struct {
+	err error
+}
+
+func (m MockMongoReporter) Ping(_ context.Context, _ *readpref.ReadPref) error {
+	return m.err
+}
+
+func TestMongoProbe(t *testing.T) {
+	reporter := &MockMongoReporter{
+		err: nil,
+	}
+
+	probe := MongoProbe(reporter)
+
+	assert.NoError(t, probe())
+}
+
+func TestMongoProbe_err(t *testing.T) {
+	reporter := &MockMongoReporter{
+		err: errors.New("fail"),
+	}
+
+	probe := MongoProbe(reporter)
+
 	assert.Error(t, probe())
 }
 
