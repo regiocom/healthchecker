@@ -70,6 +70,41 @@ src := NewCustomService()
 checker.AddReadinessProbe("my-service", MyCustomServiceProbe(srv))
 ```
 
+## Integrate with Kubernetes
+
+This package is designed to seamlessly integrate with kubernetes. Lets asume we have a container image named `company/my-service` which uses this package. Than you can add the following lines to your deployment to enable monitoring by kubernetes. Kubernetes is now automatically restarting your service if it does not return alive in three consequitive requests. Also the pod is skipped by the load balancer as long it isn't ready. Learn more [about health checks](#about-heath-checks).
+
+```diff
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service1
+spec:
+  selector:
+    matchLabels:
+      app: service1
+  template:
+    metadata:
+      labels:
+        app: service1
+    spec:
+      containers:
+        - name: service1
+          image: company/my-service:latest
+          ports:
+            - containerPort: 80
++          livenessProbe:
++            httpGet:
++              path: /.well-known/alive
++              port: 80
++          readinessProbe:
++            httpGet:
++              path: /.well-known/ready
++              port: 80
+```
+
+---
+
 ## About Heath Checks
 
 Kubernetes distinguishes between [liveliness](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command) and [readiness](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-readiness-probes) checks. Thus, our services should provide two endpoints, one to check if the service is **alive** and one to check if the service is **ready**. 
@@ -84,7 +119,7 @@ A service is defined as ready, if all mandatory dependent services, for example 
 
 A service which is alive, but not ready has to recover itself.
 
-> Per default both states are checked **every 2 seconds** after an initial delay of **10 seconds**. If a service needs more than 5 seconds to come up (alive=true), you should increase the initial delay to twice the mean startup time.
+> ℹ Per default both states are checked **every 2 seconds** after an initial delay of **10 seconds**. If a service needs more than 5 seconds to come up (alive=true), you should increase the initial delay to twice the mean startup time.
 
 ### State decision matrix
 
