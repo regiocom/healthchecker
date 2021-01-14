@@ -17,7 +17,7 @@ require (
 	github.com/nats-io/nkeys v0.0.2 // indirect
 	github.com/nats-io/nuid v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.2.6+incompatible // indirect
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/net v0.0.0-20200923182212-328152dc79b1 // indirect
 	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
