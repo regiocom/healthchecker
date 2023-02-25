@@ -4,7 +4,6 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/frankban/quicktest v1.4.1 // indirect
 	github.com/go-test/deep v1.0.2 // indirect
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/hashicorp/go-hclog v0.14.1 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
@@ -20,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.mongodb.org/mongo-driver v1.5.0
 	golang.org/x/net v0.0.0-20200923182212-328152dc79b1 // indirect
-	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/grpc v1.36.0
